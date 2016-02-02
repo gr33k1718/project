@@ -1,21 +1,15 @@
 package application.com.test;
 
-import android.content.Context;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
 
-/**
- * Created by gr33k1718 on 19/01/2016.
- */
 public class ChargeLocation {
     private String lastChargeTDate;
     private Location location;

@@ -3,7 +3,6 @@ package application.com.test;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
 
