@@ -33,14 +33,17 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by gr33k1718 on 14/01/2016.
  */
 public class MyService extends Service {
-
+    Timer timer;
+    Long UPDATE_INTERVAL;
     int a = 0;
-    IntentFilter level = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+    /*IntentFilter level = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
 
     private final BroadcastReceiver mBatteryInfoReceiver = new BroadcastReceiver() {
         @Override
@@ -50,11 +53,15 @@ public class MyService extends Service {
 
         }
     };
+    */
     @Override
     public void onCreate() {
         super.onCreate();
-
-        registerReceiver(mBatteryInfoReceiver,level);
+        Toast.makeText(this, "Created", Toast.LENGTH_SHORT).show();
+        timer = new Timer();
+        //registerReceiver(mBatteryInfoReceiver,level);
+        //a();
+        Log.d("TAG:timer", "Created");
 
     }
 
@@ -66,7 +73,10 @@ public class MyService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Toast.makeText(this, "Started", Toast.LENGTH_SHORT).show();
 
+        Log.d("TAG:timer", String.valueOf(getBatteryLevel()));
+        stopSelf();
         /*IntentFilter filter = new IntentFilter(Intent.ACTION_TIME_TICK);
         IntentFilter level = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
 
@@ -91,6 +101,23 @@ public class MyService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         return null;
+    }
+
+    private void a (){
+        UPDATE_INTERVAL = 1000l;
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                Log.d("TAG:timer", "hi");
+            }
+        }, 0, UPDATE_INTERVAL);
+    }
+    public int getBatteryLevel() {
+        Intent batteryIntent = registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+        int level = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+        int scale = batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+
+        return level;
     }
 }
 

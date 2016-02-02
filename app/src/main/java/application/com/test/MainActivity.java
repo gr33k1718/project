@@ -1,8 +1,14 @@
 package application.com.test;
 
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.BatteryManager;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
@@ -24,6 +30,7 @@ import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.logging.Handler;
 
@@ -37,6 +44,7 @@ public class MainActivity extends Activity {
     private AdapterChargeLocation myLoc;
     private String s;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,12 +52,16 @@ public class MainActivity extends Activity {
         String b = Settings.System.getString(this.getContentResolver(),Settings.System.SCREEN_BRIGHTNESS);
         String a = Settings.Global.getString(this.getContentResolver(), Settings.Global.WIFI_SLEEP_POLICY);
         tv = (TextView)findViewById(R.id.textView);
-        tv.setText(b);
+        //tv.setText(String.valueOf(getBatteryLevel()));
         setup();
 
         setupListeners();
-
-        Toast.makeText(this,meminfo(),Toast.LENGTH_LONG).show();
+        scheduleAlarm();
+       /* MyRec mBatteryLevelReceiver = new MyRec();
+        registerReceiver(mBatteryLevelReceiver, new IntentFilter(
+                Intent.ACTION_BATTERY_CHANGED));
+*/
+        //Toast.makeText(this,meminfo(),Toast.LENGTH_LONG).show();
     }
 
     public void setup(){
@@ -134,6 +146,7 @@ public class MainActivity extends Activity {
         });
     }
 
+    /*
     private float readUsage() {
         try {
             RandomAccessFile reader = new RandomAccessFile("/proc/stat", "r");
@@ -199,6 +212,28 @@ public class MainActivity extends Activity {
                     e.printStackTrace();
                 }
         return s;
+
+
+    }
+    */
+    public void scheduleAlarm()
+    {
+        // time at which alarm will be scheduled here alarm is scheduled at 1 day from current time,
+        // we fetch  the current time in milliseconds and added 1 day time
+        // i.e. 24*60*60*1000= 86,400,000   milliseconds in a day
+        Long time = new GregorianCalendar().getTimeInMillis()+24*60*60*1000;
+
+        // create an Intent and set the class which will execute when Alarm triggers, here we have
+        // given AlarmReciever in the Intent, the onRecieve() method of this class will execute when
+        // alarm triggers and
+        //we will write the code to send SMS inside onRecieve() method pf Alarmreciever class
+        Intent intentAlarm = new Intent(this, MyService.class);
+
+        // create the object
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+
+        //set the alarm for particular time
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), AlarmManager.INTERVAL_HALF_HOUR, PendingIntent.getService(this, 1, intentAlarm, PendingIntent.FLAG_UPDATE_CURRENT));
 
 
     }

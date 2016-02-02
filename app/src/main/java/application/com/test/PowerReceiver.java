@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -45,7 +46,7 @@ public class PowerReceiver extends BroadcastReceiver implements ConnectionCallba
             sharedPreference = new SharedPreference();
 
             //Connect to google play services
-
+            //context.stopService(i);
             apiClient.connect();
         }
         else if (action.equals(Intent.ACTION_POWER_DISCONNECTED)){
@@ -90,4 +91,5 @@ public class PowerReceiver extends BroadcastReceiver implements ConnectionCallba
     public void onConnectionFailed(ConnectionResult connectionResult) {
         Toast.makeText(context, "Connection failed" , Toast.LENGTH_SHORT).show();
     }
+
 }
