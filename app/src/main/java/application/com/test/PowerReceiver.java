@@ -19,12 +19,11 @@ public class PowerReceiver extends BroadcastReceiver implements ConnectionCallba
     private Context context;
     private GoogleApiClient apiClient;
     private Location location;
-    private SharedPreference sharedPreference;
+    private SharedPreference sharedPreference = new SharedPreference();;
     private Calendar time;
 
 
     public void onReceive(Context context, Intent intent) {
-        sharedPreference = new SharedPreference();
         this.context = context;
         time = Calendar.getInstance();
         apiClient = new GoogleApiClient.Builder(context)
@@ -60,6 +59,7 @@ public class PowerReceiver extends BroadcastReceiver implements ConnectionCallba
         Toast.makeText(context, sharedPreference.displayVisits() +
                                 " Hour of day " + time.get(Calendar.HOUR_OF_DAY),
                 Toast.LENGTH_LONG).show();
+
     }
 
     @Override
@@ -71,5 +71,4 @@ public class PowerReceiver extends BroadcastReceiver implements ConnectionCallba
     public void onConnectionFailed(ConnectionResult connectionResult) {
         Toast.makeText(context, "Connection failed" , Toast.LENGTH_SHORT).show();
     }
-
 }

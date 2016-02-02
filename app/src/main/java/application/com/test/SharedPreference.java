@@ -3,9 +3,7 @@ package application.com.test;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-
 import com.google.gson.Gson;
-
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -92,7 +90,7 @@ public class SharedPreference {
                         l.increaseVisits();
                         l.setChargingTime(time.get(Calendar.HOUR_OF_DAY));
                         l.setLastChargeDate(date);
-                        return;
+                        //return;
                     }
                 }
             }

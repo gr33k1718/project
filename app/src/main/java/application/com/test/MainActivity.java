@@ -27,7 +27,6 @@ public class MainActivity extends Activity {
     private ArrayList<ChargeLocation> chargeLocations;
     private AdapterChargeLocation myLoc;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,30 +34,25 @@ public class MainActivity extends Activity {
         String b = Settings.System.getString(this.getContentResolver(),Settings.System.SCREEN_BRIGHTNESS);
         String a = Settings.Global.getString(this.getContentResolver(), Settings.Global.WIFI_SLEEP_POLICY);
         tv = (TextView)findViewById(R.id.textView);
-        tv.setText(b);
+        tv.setText(String.valueOf(b));
         setup();
 
         setupListeners();
-
         scheduleAlarm();
+
     }
 
-
     public void setup(){
-
         prefs = new SharedPreference();
         chargeLocations = prefs.getChargeLocations(this);
         myLoc = new AdapterChargeLocation(this, R.layout.charge_location_list_item, chargeLocations);
 
     }
 
-
     public void setupListeners(){
-
         updateAdapter();
         removeAdapterItem();
         lv.setAdapter(myLoc);
-
     }
 
     @Override
@@ -130,11 +124,12 @@ public class MainActivity extends Activity {
         });
     }
 
-
     public void scheduleAlarm()
     {
         Intent intentAlarm = new Intent(this, MyService.class);
+
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+
         alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), AlarmManager.INTERVAL_HALF_HOUR, PendingIntent.getService(this, 1, intentAlarm, PendingIntent.FLAG_UPDATE_CURRENT));
 
     }
