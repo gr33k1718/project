@@ -43,7 +43,6 @@ public class PowerReceiver extends BroadcastReceiver implements ConnectionCallba
             Toast.makeText(context, "Power disconnected" , Toast.LENGTH_SHORT).show();
 
             apiClient.disconnect();
-
         }
     }
 

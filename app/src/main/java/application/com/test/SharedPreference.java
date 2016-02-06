@@ -14,7 +14,9 @@ import java.util.List;
 public class SharedPreference {
 
     private static String PREFS_NAME = "LOCATIONS";
+    private static String SCREEN_TIME_PREFS = "SCRREN_TIME";
     private static String CHARGE_POINTS = "Charge_Points";
+    private static String SCREEN_TIME = "Screen_time";
 
     private Calendar time = Calendar.getInstance();
     private Context context = GlobalVars.getAppContext();
@@ -90,7 +92,7 @@ public class SharedPreference {
                         l.increaseVisits();
                         l.setChargingTime(time.get(Calendar.HOUR_OF_DAY));
                         l.setLastChargeDate(date);
-                        //return;
+                        break;
                     }
                 }
             }
@@ -100,13 +102,13 @@ public class SharedPreference {
     }
 
 
-    public void clearLocations(Context context){
+    public void removePrefItem(String fileName, String pref){
         SharedPreferences settings;
         Editor editor;
 
-        settings = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        settings = context.getSharedPreferences(fileName, Context.MODE_PRIVATE);
         editor = settings.edit();
-        editor.remove(CHARGE_POINTS);
+        editor.remove(pref);
         editor.commit();
     }
 
@@ -144,4 +146,25 @@ public class SharedPreference {
             return  lastCharge - current;
         }
     }
+
+    public void saveTimes(Long times){
+        SharedPreferences settings;
+        Editor editor;
+
+        settings = context.getSharedPreferences(SCREEN_TIME_PREFS, Context.MODE_PRIVATE);
+        editor = settings.edit();
+
+        editor.putLong(SCREEN_TIME, times);
+
+        editor.commit();
+    }
+
+    public long loadTimes(){
+        SharedPreferences settings;
+
+        settings = context.getSharedPreferences(SCREEN_TIME_PREFS, Context.MODE_PRIVATE);
+
+        return settings.getLong(SCREEN_TIME, -1);
+    }
+
 }

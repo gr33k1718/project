@@ -16,7 +16,10 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import java.util.ArrayList;
+import java.util.Calendar;
 
 public class MainActivity extends Activity {
 
@@ -24,6 +27,7 @@ public class MainActivity extends Activity {
     private ListView lv;
     private SharedPreference prefs;
     private Button mUpdateButton;
+    private Button mUsageButton;
     private ArrayList<ChargeLocation> chargeLocations;
     private AdapterChargeLocation myLoc;
 
@@ -35,9 +39,8 @@ public class MainActivity extends Activity {
         String a = Settings.Global.getString(this.getContentResolver(), Settings.Global.WIFI_SLEEP_POLICY);
         tv = (TextView)findViewById(R.id.textView);
         tv.setText(String.valueOf(b));
-        setup();
 
-        setupListeners();
+        setup();
         scheduleAlarm();
 
     }
@@ -46,14 +49,11 @@ public class MainActivity extends Activity {
         prefs = new SharedPreference();
         chargeLocations = prefs.getChargeLocations(this);
         myLoc = new AdapterChargeLocation(this, R.layout.charge_location_list_item, chargeLocations);
-
-    }
-
-    public void setupListeners(){
         updateAdapter();
         removeAdapterItem();
         lv.setAdapter(myLoc);
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -76,6 +76,8 @@ public class MainActivity extends Activity {
 
     public void updateAdapter(){
         mUpdateButton = (Button)findViewById(R.id.updateButton);
+        mUsageButton = (Button)findViewById(R.id.usageButton);
+
         mUpdateButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -87,6 +89,15 @@ public class MainActivity extends Activity {
 
             }
         });
+
+        mUsageButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
+            }
+        });
+
     }
 
     public void removeAdapterItem(){
@@ -126,11 +137,24 @@ public class MainActivity extends Activity {
 
     public void scheduleAlarm()
     {
-        Intent intentAlarm = new Intent(this, MyService.class);
+        //Create alarm at the top of the hour or half past every 30 min
+        Calendar time = Calendar.getInstance();
+        if(time.get(Calendar.MINUTE) >= 30){
+            Toast.makeText(this, "Over 30", Toast.LENGTH_SHORT).show();
+            time.set(Calendar.HOUR_OF_DAY, time.get(Calendar.HOUR_OF_DAY) +1);
+            time.set(Calendar.MINUTE, 0);
+        }
+        else{
+            Toast.makeText(this, "Under 30", Toast.LENGTH_SHORT).show();
+            time.set(Calendar.HOUR_OF_DAY, time.get(Calendar.HOUR_OF_DAY));
+            time.set(Calendar.MINUTE, 30);
+        }
+
+        time.set(Calendar.SECOND, 0);
 
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), AlarmManager.INTERVAL_HALF_HOUR, PendingIntent.getService(this, 1, intentAlarm, PendingIntent.FLAG_UPDATE_CURRENT));
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, time.getTimeInMillis(), AlarmManager.INTERVAL_HALF_HOUR,
+                                PendingIntent.getService(this, 1, new Intent(this, MyService.class), PendingIntent.FLAG_UPDATE_CURRENT));
 
     }
 }
