@@ -18,13 +18,11 @@
             </intent-filter>
         </activity>
         <service android:name=".ScreenOnService"></service>
-        <receiver android:name=".PowerReceiver" android:enabled="true">
+        <receiver android:name=".ChargeLocationReceiver" android:enabled="true">
             <intent-filter>
                 <action android:name="android.intent.action.ACTION_POWER_CONNECTED"/>
                 <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED"/>
             </intent-filter>
-        </receiver>
-        <receiver android:name=".BootReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
@@ -33,7 +31,7 @@
                 <data android:scheme="package" android:path="application.com.test" />
             </intent-filter>
         </receiver>
-        <service android:name=".MyService"></service>
+        <service android:name=".BatteryService"></service>
         <service android:name=".ScreenOnService"></service>
     </application>
     <uses-permission android:name="android.permission.BATTERY_STATS"></uses-permission>

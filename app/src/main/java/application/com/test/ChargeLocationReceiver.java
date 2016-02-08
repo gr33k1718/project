@@ -14,7 +14,7 @@ import com.google.android.gms.common.api.GoogleApiClient.*;
 import java.util.Calendar;
 
 
-public class PowerReceiver extends BroadcastReceiver implements ConnectionCallbacks, OnConnectionFailedListener {
+public class ChargeLocationReceiver extends BroadcastReceiver implements ConnectionCallbacks, OnConnectionFailedListener {
 
     private Context context;
     private GoogleApiClient apiClient;
@@ -34,16 +34,21 @@ public class PowerReceiver extends BroadcastReceiver implements ConnectionCallba
 
         String action = intent.getAction();
 
-        if(action.equals(Intent.ACTION_POWER_CONNECTED)) {
-            Toast.makeText(context, "Power connected ", Toast.LENGTH_SHORT).show();
-
-            apiClient.connect();
+        switch(action){
+            case Intent.ACTION_POWER_CONNECTED:
+                Toast.makeText(context, "Power connected ", Toast.LENGTH_SHORT).show();
+                apiClient.connect();
+                break;
+            case Intent.ACTION_POWER_DISCONNECTED:
+                Toast.makeText(context, "Power disconnected" , Toast.LENGTH_SHORT).show();
+                apiClient.disconnect();
+                break;
+            case Intent.ACTION_BOOT_COMPLETED:
+            case Intent.ACTION_PACKAGE_REPLACED:
+                context.startService(new Intent(context, ScreenOnService.class));
+                break;
         }
-        else if (action.equals(Intent.ACTION_POWER_DISCONNECTED)){
-            Toast.makeText(context, "Power disconnected" , Toast.LENGTH_SHORT).show();
 
-            apiClient.disconnect();
-        }
     }
 
     @Override

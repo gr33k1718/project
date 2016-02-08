@@ -146,25 +146,4 @@ public class SharedPreference {
             return  lastCharge - current;
         }
     }
-
-    public void saveTimes(Long times){
-        SharedPreferences settings;
-        Editor editor;
-
-        settings = context.getSharedPreferences(SCREEN_TIME_PREFS, Context.MODE_PRIVATE);
-        editor = settings.edit();
-
-        editor.putLong(SCREEN_TIME, times);
-
-        editor.commit();
-    }
-
-    public long loadTimes(){
-        SharedPreferences settings;
-
-        settings = context.getSharedPreferences(SCREEN_TIME_PREFS, Context.MODE_PRIVATE);
-
-        return settings.getLong(SCREEN_TIME, -1);
-    }
-
 }

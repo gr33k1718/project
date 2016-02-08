@@ -12,7 +12,7 @@ import android.provider.Settings;
 import android.util.Log;
 import android.widget.Toast;
 
-public class MyService extends Service {
+public class BatteryService extends Service {
 
     PowerManager pm;
     PowerManager.WakeLock wl;
@@ -56,8 +56,8 @@ public class MyService extends Service {
 
     public String batteryContext() {
         Intent batteryIntent = registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-        String brightness = Settings.System.getString(this.getContentResolver(), android.provider.Settings.System.SCREEN_BRIGHTNESS);
-        String timeout = Settings.System.getString(this.getContentResolver(),Settings.System.SCREEN_OFF_TIMEOUT);
+        String brightness = DisplayContext.screenBrightness();
+        String timeout = DisplayContext.screenTimeout();
         int level = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
 
         return "Battery level: " + level + "\nBrightness: " + brightness + "\nTimeout value: " +timeout;

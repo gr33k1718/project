@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,6 +19,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -36,12 +40,19 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         String b = Settings.System.getString(this.getContentResolver(),Settings.System.SCREEN_BRIGHTNESS);
-        String a = Settings.Global.getString(this.getContentResolver(), Settings.Global.WIFI_SLEEP_POLICY);
+        String c = executeTop();
+        /*int a = getCpuUsageStatistic()[0];
+        int d = getCpuUsageStatistic()[1];
+        int f = getCpuUsageStatistic()[2];
+        int g = getCpuUsageStatistic()[3];
+        String shit = a + " " + d + " " + f + " " + g;
+        */
         tv = (TextView)findViewById(R.id.textView);
-        tv.setText(String.valueOf(b));
+        tv.setText(b);
 
         setup();
         scheduleAlarm();
+
 
     }
 
@@ -154,7 +165,72 @@ public class MainActivity extends Activity {
 
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, time.getTimeInMillis(), AlarmManager.INTERVAL_HALF_HOUR,
-                                PendingIntent.getService(this, 1, new Intent(this, MyService.class), PendingIntent.FLAG_UPDATE_CURRENT));
+                PendingIntent.getService(this, 1, new Intent(this, BatteryService.class), PendingIntent.FLAG_UPDATE_CURRENT));
 
+    }
+
+    public String getCPUUsage(int pid) {
+        Process p;
+        String line = "";
+        try {
+            String[] cmd = {
+                    "sh",
+                    "-c",
+                    "top -m 1000 -d 1 -n 1"}; // | grep \"" + pid + "\" "};
+            p = Runtime.getRuntime().exec(cmd);
+            line = p.toString();
+            // line contains the process info
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return line;
+    }
+    private int[] getCpuUsageStatistic() {
+
+        String tempString = executeTop();
+
+        tempString = tempString.replaceAll(",", "");
+        tempString = tempString.replaceAll("User", "");
+        tempString = tempString.replaceAll("System", "");
+        tempString = tempString.replaceAll("IOW", "");
+        tempString = tempString.replaceAll("IRQ", "");
+        tempString = tempString.replaceAll("%", "");
+        for (int i = 0; i < 10; i++) {
+            tempString = tempString.replaceAll("  ", " ");
+        }
+        tempString = tempString.trim();
+        String[] myString = tempString.split(" ");
+        int[] cpuUsageAsInt = new int[myString.length];
+        for (int i = 0; i < myString.length; i++) {
+            myString[i] = myString[i].trim();
+            cpuUsageAsInt[i] = Integer.parseInt(myString[i]);
+        }
+        return cpuUsageAsInt;
+    }
+
+    private String executeTop() {
+        java.lang.Process p = null;
+        BufferedReader in = null;
+        String returnString = null;
+        try {
+            p = Runtime.getRuntime().exec("top -m 1 -n 1");
+            in = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            while (returnString == null || returnString.contentEquals("")) {
+                returnString = in.readLine();
+            }
+        } catch (IOException e) {
+            Log.e("executeTop", "error in getting first line of top");
+            e.printStackTrace();
+        } finally {
+            try {
+                in.close();
+                p.destroy();
+            } catch (IOException e) {
+                Log.e("executeTop",
+                        "error in closing and destroying top process");
+                e.printStackTrace();
+            }
+        }
+        return returnString;
     }
 }
