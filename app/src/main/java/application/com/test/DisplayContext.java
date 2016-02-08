@@ -33,7 +33,7 @@ public class DisplayContext {
         private static long screenOnTime = 0;
 
         public static BroadcastReceiver setupTimer(){
-            BroadcastReceiver mybroadcast = new BroadcastReceiver() {
+            BroadcastReceiver screenOnTimerReceiver = new BroadcastReceiver() {
 
                 @Override
                 public void onReceive(Context context, Intent intent) {
@@ -60,10 +60,10 @@ public class DisplayContext {
 
                 }
             };
-            context.registerReceiver(mybroadcast, new IntentFilter(Intent.ACTION_SCREEN_ON));
-            context.registerReceiver(mybroadcast, new IntentFilter(Intent.ACTION_SCREEN_OFF));
+            context.registerReceiver(screenOnTimerReceiver, new IntentFilter(Intent.ACTION_SCREEN_ON));
+            context.registerReceiver(screenOnTimerReceiver, new IntentFilter(Intent.ACTION_SCREEN_OFF));
 
-            return mybroadcast;
+            return screenOnTimerReceiver;
         }
 
         private static void saveTime(Long time){

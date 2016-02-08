@@ -31,6 +31,11 @@
                 <data android:scheme="package" android:path="application.com.test" />
             </intent-filter>
         </receiver>
+        <receiver android:name=".WifiReceiver" android:enabled="true">
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+            </intent-filter>
+        </receiver>
         <service android:name=".BatteryService"></service>
         <service android:name=".ScreenOnService"></service>
     </application>
@@ -40,4 +45,5 @@
     <uses-permission android:name="android.permission.INTERNET"></uses-permission>
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 </manifest>
