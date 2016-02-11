@@ -16,22 +16,38 @@ public class WifiReceiver extends BroadcastReceiver {
     NetworkInfo mobileInfo = conman.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
     State wifiState = wifiInfo.getState();
     State mobileState = mobileInfo.getState();
-    long wifiConnected = 0;
+    private static final long TIME_ERROR = 7200000;
+    long mobileDisconnected = 0;
     long mobileConnected = 0;
     long wifiTime = 0;
     long mobileTime = 0;
+    long wifiConnected = 0;
+    long wifiDisconnected = 0;
+
     @Override
     public void onReceive(Context context, Intent intent) {
-        if(mobileState == NetworkInfo.State.CONNECTED && wifiState == NetworkInfo.State.DISCONNECTED){
+        //NetworkContext.clearTime();
+        //long prevTime = NetworkContext.loadTime("wifiTime");
+
+        /*if(mobileState == NetworkInfo.State.CONNECTED){
+
             mobileConnected = System.currentTimeMillis();
-            mobileTime = wifiConnected - mobileConnected;
-            Toast.makeText(context, "[mobile connected] " + mobileTime, Toast.LENGTH_SHORT).show();
+            NetworkContext.saveTime(mobileConnected, "mobileStart");
+
+            Toast.makeText(context, "[mobile connected] " + mobileConnected, Toast.LENGTH_SHORT).show();
 
         }
-        else if(mobileState == NetworkInfo.State.DISCONNECTED &&  wifiState == NetworkInfo.State.CONNECTED){
-            wifiConnected = System.currentTimeMillis();
-            wifiTime = mobileConnected - wifiConnected;
-            Toast.makeText(context, "[Wifi connected] " + wifiTime, Toast.LENGTH_SHORT).show();
+        else if(mobileState == NetworkInfo.State.DISCONNECTED){
+            mobileDisconnected = System.currentTimeMillis();
+            NetworkContext.saveTime(mobileDisconnected, "wifiStart");
+            mobileTime = mobileDisconnected - NetworkContext.loadTime("mobileStart");
+
+            if(mobileTime < TIME_ERROR) {
+                NetworkContext.saveTime(mobileTime + prevTime, "wifiTime");
+            }
+
+
+            Toast.makeText(context, "[Mobile disconnected] " + NetworkContext.loadTime("wifiTime"), Toast.LENGTH_SHORT).show();
         }
         else{
             Toast.makeText(context, "[No network]", Toast.LENGTH_SHORT).show();
@@ -46,13 +62,16 @@ public class WifiReceiver extends BroadcastReceiver {
             Toast.makeText(context, "[wifi Disconnected] " + disconnectedTime, Toast.LENGTH_SHORT).show();
         }
 
-        /*if (wifiInfo.isConnected()) {
+        */if (mobileInfo.isConnected()) {
+            wifiConnected = System.currentTimeMillis();
+            Log.i("[WiFi receiver]", "Connected " + wifiConnected);
             Toast.makeText(context, "Wifi", Toast.LENGTH_LONG).show();
-        } else if (mobileInfo.isConnected()) {
-            Toast.makeText(context, "Mobile 3G ", Toast.LENGTH_LONG).show();
         } else {
-            Toast.makeText(context, "No Network ", Toast.LENGTH_LONG).show();
-        }*/
+            wifiDisconnected = System.currentTimeMillis();
+            wifiTime = wifiDisconnected - wifiConnected;
+            Log.i("[WiFi receiver]", "Disconnected " + wifiTime);
+            Toast.makeText(context, "Time connected " + wifiTime, Toast.LENGTH_LONG).show();
+        }
     }
 
     /*private BroadcastReceiver mConnReceiver = new BroadcastReceiver() {

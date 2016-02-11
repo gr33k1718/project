@@ -2,24 +2,25 @@ package application.com.test;
 
 import android.app.Service;
 import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
+import android.widget.Toast;
 
 public class ScreenOnService extends Service {
 
     BroadcastReceiver screenOnTimer;
-
-    @Override
+    Context context = GlobalVars.getAppContext();
     public void onCreate() {
         super.onCreate();
-
+        Toast.makeText(this, "Created ", Toast.LENGTH_SHORT).show();
+        screenOnTimer = DisplayContext.InteractionTimer.setupTimer();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        super.onStartCommand(intent, flags, startId);
+        Toast.makeText(this, "Started ", Toast.LENGTH_SHORT).show();
 
-        screenOnTimer = DisplayContext.InteractionTimer.setupTimer();
 
         return Service.START_STICKY;
     }
@@ -27,8 +28,8 @@ public class ScreenOnService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        unregisterReceiver(screenOnTimer);
-        startService(new Intent(this, ScreenOnService.class));
+        Toast.makeText(this, "Destroyed ", Toast.LENGTH_SHORT).show();
+        context.unregisterReceiver(screenOnTimer);
     }
 
     @Override

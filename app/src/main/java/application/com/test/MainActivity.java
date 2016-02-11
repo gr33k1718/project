@@ -7,8 +7,10 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.TrafficStats;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.text.format.Formatter;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -20,6 +22,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -28,6 +32,7 @@ import java.util.Calendar;
 public class MainActivity extends Activity {
 
     private TextView tv;
+    private TextView tv2;
     private ListView lv;
     private SharedPreference prefs;
     private Button mUpdateButton;
@@ -35,21 +40,28 @@ public class MainActivity extends Activity {
     private ArrayList<ChargeLocation> chargeLocations;
     private AdapterChargeLocation myLoc;
 
+    private final String RX_FILE = "/sys/class/net/wlan0/statistics/rx_bytes";
+    private final String TX_FILE = "/sys/class/net/wlan0/statistics/tx_bytes";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        String b = Settings.System.getString(this.getContentResolver(),Settings.System.SCREEN_BRIGHTNESS);
-        String c = executeTop();
-        /*int a = getCpuUsageStatistic()[0];
+        String b = Settings.System.getString(this.getContentResolver(), Settings.System.SCREEN_BRIGHTNESS);
+        String c = Formatter.formatFileSize(this, readFile(TX_FILE));
+        String a = Formatter.formatFileSize(this, TrafficStats.getMobileRxBytes() + TrafficStats.getMobileTxBytes());
+        MyLocation my = new MyLocation();
+        double longi = my.getLongitude();
+        /*
         int d = getCpuUsageStatistic()[1];
         int f = getCpuUsageStatistic()[2];
         int g = getCpuUsageStatistic()[3];
         String shit = a + " " + d + " " + f + " " + g;
         */
+        tv2 = (TextView)findViewById(R.id.textView2);
         tv = (TextView)findViewById(R.id.textView);
-        tv.setText(b);
-
+        tv.setText(String.valueOf(longi));
+        tv2.setText(a);
         setup();
         scheduleAlarm();
 
@@ -148,23 +160,15 @@ public class MainActivity extends Activity {
 
     public void scheduleAlarm()
     {
-        //Create alarm at the top of the hour or half past every 30 min
+        //Create alarm at the top of the hour
         Calendar time = Calendar.getInstance();
-        if(time.get(Calendar.MINUTE) >= 30){
-            Toast.makeText(this, "Over 30", Toast.LENGTH_SHORT).show();
-            time.set(Calendar.HOUR_OF_DAY, time.get(Calendar.HOUR_OF_DAY) +1);
-            time.set(Calendar.MINUTE, 0);
-        }
-        else{
-            Toast.makeText(this, "Under 30", Toast.LENGTH_SHORT).show();
-            time.set(Calendar.HOUR_OF_DAY, time.get(Calendar.HOUR_OF_DAY));
-            time.set(Calendar.MINUTE, 30);
-        }
-
-        time.set(Calendar.SECOND, 0);
+        Toast.makeText(this, "Alarm set", Toast.LENGTH_SHORT).show();
+        time.set(Calendar.HOUR_OF_DAY, time.get(Calendar.HOUR_OF_DAY) +1);
+        time.set(Calendar.MINUTE, 0);
 
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, time.getTimeInMillis(), AlarmManager.INTERVAL_HALF_HOUR,
+        alarmManager.cancel(PendingIntent.getService(this, 1, new Intent(this, BatteryService.class), PendingIntent.FLAG_UPDATE_CURRENT));
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, time.getTimeInMillis(), AlarmManager.INTERVAL_HOUR,
                 PendingIntent.getService(this, 1, new Intent(this, BatteryService.class), PendingIntent.FLAG_UPDATE_CURRENT));
 
     }
@@ -232,5 +236,31 @@ public class MainActivity extends Activity {
             }
         }
         return returnString;
+    }
+
+
+    private long readFile(String fileName){
+        File file = new File(fileName);
+        BufferedReader br = null;
+        long bytes = 0;
+        try{
+            br = new BufferedReader(new FileReader(file));
+            String line = "";
+            line = br.readLine();
+            bytes = Long.parseLong(line);
+        }  catch (Exception e){
+            e.printStackTrace();
+            return 0;
+
+        } finally{
+            if (br != null)
+                try {
+                    br.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+        }
+
+        return bytes;
     }
 }

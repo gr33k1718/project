@@ -16,7 +16,7 @@ public class SharedPreference {
     private static String PREFS_NAME = "LOCATIONS";
     private static String SCREEN_TIME_PREFS = "SCRREN_TIME";
     private static String CHARGE_POINTS = "Charge_Points";
-    private static String SCREEN_TIME = "Screen_time";
+
 
     private Calendar time = Calendar.getInstance();
     private Context context = GlobalVars.getAppContext();
@@ -146,4 +146,48 @@ public class SharedPreference {
             return  lastCharge - current;
         }
     }
+
+    public void saveIntInfo(int value, String type){
+        SharedPreferences settings;
+        SharedPreferences.Editor editor;
+
+        settings = context.getSharedPreferences(Constants.SYSTEM_CONTEXT_PREFS, Context.MODE_PRIVATE);
+        editor = settings.edit();
+
+        switch(type){
+            case "period":
+                editor.putInt(Constants.PERIOD_PREF, value);
+                break;
+            case " brightness":
+                editor.putInt(Constants.BRIGHTNESS_PREF, value);
+                break;
+            case "batteryLevel":
+                editor.putInt(Constants.BATTERY_LEVEL_PREF, value);
+                break;
+        }
+        editor.commit();
+    }
+
+    public void saveLongInfo(long value, String type){
+        SharedPreferences settings;
+        SharedPreferences.Editor editor;
+
+        settings = context.getSharedPreferences(Constants.SYSTEM_CONTEXT_PREFS, Context.MODE_PRIVATE);
+        editor = settings.edit();
+
+        switch(type){
+            case "interactionTime":
+                editor.putLong(Constants.INTERACTION_TIME_PREF, value);
+                break;
+            case " networkTraffic":
+                editor.putLong(Constants.NETWORK_TRAFFIC_PREF, value);
+                break;
+            case "mobileTraffic":
+                editor.putLong(Constants.MOBILE_TRAFFIC_PREF, value);
+                break;
+        }
+        editor.commit();
+    }
+
+
 }

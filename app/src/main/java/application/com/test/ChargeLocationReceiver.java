@@ -19,7 +19,7 @@ public class ChargeLocationReceiver extends BroadcastReceiver implements Connect
     private Context context;
     private GoogleApiClient apiClient;
     private Location location;
-    private SharedPreference sharedPreference = new SharedPreference();;
+    private SharedPreference sharedPreference = new SharedPreference();
     private Calendar time;
 
 
@@ -45,7 +45,7 @@ public class ChargeLocationReceiver extends BroadcastReceiver implements Connect
                 break;
             case Intent.ACTION_BOOT_COMPLETED:
             case Intent.ACTION_PACKAGE_REPLACED:
-                context.startService(new Intent(context, ScreenOnService.class));
+                context.startService(new Intent(context,ScreenOnService.class));
                 break;
         }
 
@@ -56,6 +56,7 @@ public class ChargeLocationReceiver extends BroadcastReceiver implements Connect
         ChargeLocation chargeLocation;
 
         location = LocationServices.FusedLocationApi.getLastLocation(apiClient);
+
         chargeLocation = new ChargeLocation(location, time.get(Calendar.HOUR_OF_DAY));
 
         sharedPreference.addLocation(chargeLocation);

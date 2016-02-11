@@ -11,19 +11,18 @@ import android.util.Log;
 import android.widget.Toast;
 
 public class DisplayContext {
-    private static final String SCREEN_TIME_PREFS = "SCRREN_TIME";
-    private static final String SCREEN_ON_TIME = "Screen_on_time";
+
     private static final long TIME_ERROR = 7200000;
 
 
     private static Context context = GlobalVars.getAppContext();
 
-    public static String screenBrightness(){
-        return Settings.System.getString(context.getContentResolver(), Settings.System.SCREEN_BRIGHTNESS);
+    public static int screenBrightness(){
+        return Settings.System.getInt(context.getContentResolver(), Settings.System.SCREEN_BRIGHTNESS, -1);
     }
 
-    public static String screenTimeout(){
-        return Settings.System.getString(context.getContentResolver(), Settings.System.SCREEN_OFF_TIMEOUT);
+    public static int screenTimeout(){
+        return Settings.System.getInt(context.getContentResolver(), Settings.System.SCREEN_OFF_TIMEOUT, -1);
     }
 
     public static class InteractionTimer {
@@ -38,22 +37,22 @@ public class DisplayContext {
                 @Override
                 public void onReceive(Context context, Intent intent) {
                     Log.i("[BroadcastReceiver]", "MyReceiver");
-                    long prevTime = loadTime();
+                    long prevTime = loadTime(Constants.SCREEN_ON_TIME_PREF);
                     if(intent.getAction().equals(Intent.ACTION_SCREEN_ON)){
                         screenOnStartTime = System.currentTimeMillis();
-
+                        saveTime(screenOnStartTime, Constants.SCREEN_ON_START_TIME_PREF);
                         Log.i("[BroadcastReceiver]", "Screen ON " + screenOnStartTime);
-                        Toast.makeText(context, "Total time " + convertMillisecondsToHMmSs(loadTime()), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, "Total time " + convertMillisecondsToHMmSs(loadTime(Constants.SCREEN_ON_TIME_PREF)), Toast.LENGTH_SHORT).show();
                     }
                     else if(intent.getAction().equals(Intent.ACTION_SCREEN_OFF)){
                         screenOnEndTime = System.currentTimeMillis();
-                        screenOnTime = screenOnEndTime - screenOnStartTime;
+                        screenOnTime = screenOnEndTime - loadTime(Constants.SCREEN_ON_START_TIME_PREF);
 
-                        if(screenOnTime < TIME_ERROR && prevTime > 0) {
-                            saveTime(prevTime + screenOnTime);
+                        if(screenOnTime < TIME_ERROR) {
+                            saveTime(prevTime + screenOnTime, Constants.SCREEN_ON_TIME_PREF);
 
                             Log.i("[BroadcastReceiver]", "Screen OFF " + prevTime);
-                            Log.i("[BroadcastReceiver]", "Total time " + convertMillisecondsToHMmSs(loadTime()));
+                            Log.i("[BroadcastReceiver]", "Total time " + convertMillisecondsToHMmSs(loadTime(Constants.SCREEN_ON_TIME_PREF)));
                         }
 
                     }
@@ -66,32 +65,41 @@ public class DisplayContext {
             return screenOnTimerReceiver;
         }
 
-        private static void saveTime(Long time){
+        public static void saveTime(Long time, String type){
             SharedPreferences settings;
             Editor editor;
 
-            settings = context.getSharedPreferences(SCREEN_TIME_PREFS, Context.MODE_PRIVATE);
+            settings = context.getSharedPreferences(Constants.SCREEN_TIME_PREFS, Context.MODE_PRIVATE);
             editor = settings.edit();
 
-            editor.putLong(SCREEN_ON_TIME, time);
+            if(type.equals(Constants.SCREEN_ON_TIME_PREF)) {
+                editor.putLong(Constants.SCREEN_ON_TIME_PREF, time);
+            }
+            else{
+                editor.putLong(Constants.SCREEN_ON_START_TIME_PREF, time);
+            }
 
             editor.commit();
         }
 
-        private static long loadTime(){
+        public static long loadTime(String type){
             SharedPreferences settings;
-            settings = context.getSharedPreferences(SCREEN_TIME_PREFS, Context.MODE_PRIVATE);
-
-            return settings.getLong(SCREEN_ON_TIME, -1);
+            settings = context.getSharedPreferences(Constants.SCREEN_TIME_PREFS, Context.MODE_PRIVATE);
+            if(type.equals(Constants.SCREEN_ON_TIME_PREF)) {
+                return settings.getLong(Constants.SCREEN_ON_TIME_PREF, 0);
+            }
+            else{
+                return settings.getLong(Constants.SCREEN_ON_START_TIME_PREF, 0);
+            }
         }
 
         public static void clearTime(){
             SharedPreferences settings;
             Editor editor;
 
-            settings = context.getSharedPreferences(SCREEN_TIME_PREFS, Context.MODE_PRIVATE);
+            settings = context.getSharedPreferences(Constants.SCREEN_TIME_PREFS, Context.MODE_PRIVATE);
             editor = settings.edit();
-            editor.remove(SCREEN_ON_TIME);
+            editor.remove(Constants.SCREEN_ON_TIME_PREF);
             editor.commit();
         }
 
