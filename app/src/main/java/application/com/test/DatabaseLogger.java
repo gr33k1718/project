@@ -9,7 +9,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 
-public class ContextLogger {
+public class DatabaseLogger {
     private static final String DATABASE_NAME = "logs.db";
     private static final int DATABASE_VERSION = 4;
     private static final String LOG_TABLE_NAME = "logs";
@@ -21,7 +21,7 @@ public class ContextLogger {
     private SQLiteDatabase rdb;
     private SQLiteDatabase wdb;
 
-    public ContextLogger(Context context) {
+    public DatabaseLogger(Context context) {
         mSQLOpenHelper = new SQLOpenHelper(context);
 
         openDBs();

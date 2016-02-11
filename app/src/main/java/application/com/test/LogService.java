@@ -1,32 +1,21 @@
 package application.com.test;
 
 import android.app.Service;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.TrafficStats;
 import android.os.BatteryManager;
 import android.os.IBinder;
 import android.os.PowerManager;
-import android.provider.Settings;
 import android.util.Log;
 import android.widget.Toast;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.Calendar;
 
-public class BatteryService extends Service {
+public class LogService extends Service {
 
     PowerManager pm;
     PowerManager.WakeLock wl;
-
-    private final String RX_FILE = "/sys/class/net/wlan0/statistics/rx_bytes";
-    private final String TX_FILE = "/sys/class/net/wlan0/statistics/tx_bytes";
-
 
     @Override
     public void onCreate() {
@@ -59,27 +48,16 @@ public class BatteryService extends Service {
         wl.release();
     }
 
-
-
     @Override
     public IBinder onBind(Intent intent) {
         return null;
     }
 
     public String batteryContext() {
-        PowerManager pm = (PowerManager)getSystemService(Context.POWER_SERVICE);
         long interactionTime;
-        long prevMobileStats = NetworkContext.loadTraffic(Constants.MOBILE_TRAFFIC);
-        long prevNetworkStats = NetworkContext.loadTraffic(Constants.NETWORK_TRAFFIC);
 
-        long currentMobileStats = TrafficStats.getMobileRxBytes() + TrafficStats.getMobileTxBytes();
-        long currentNetworkStats = readFile(TX_FILE) + readFile(RX_FILE);
-
-        NetworkContext.saveTraffic(currentNetworkStats,Constants.NETWORK_TRAFFIC);
-        NetworkContext.saveTraffic(currentMobileStats,Constants.MOBILE_TRAFFIC);
-
-        long networkTraffic = currentNetworkStats - prevNetworkStats;
-        long mobileTraffic = currentMobileStats - prevMobileStats;
+        long networkTraffic = NetworkContext.getNetworkTraffic();
+        long mobileTraffic = NetworkContext.getMobileTraffic();
 
         Intent batteryIntent = registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
         int batteryLevel = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
@@ -92,6 +70,7 @@ public class BatteryService extends Service {
 
         if(!pm.isInteractive()) {
             interactionTime = DisplayContext.InteractionTimer.loadTime(Constants.SCREEN_ON_TIME_PREF);
+            DisplayContext.InteractionTimer.saveTime(0l,Constants.SCREEN_ON_START_TIME_PREF);
         }else {
             interactionTime = System.currentTimeMillis() - DisplayContext.InteractionTimer.loadTime(Constants.SCREEN_ON_START_TIME_PREF);
             DisplayContext.InteractionTimer.saveTime(System.currentTimeMillis(),Constants.SCREEN_ON_START_TIME_PREF);
@@ -99,13 +78,12 @@ public class BatteryService extends Service {
         }
         DisplayContext.InteractionTimer.clearTime();
 
+        DatabaseLogger c = new DatabaseLogger(this);
         SystemContext s = new SystemContext(period,brightness,batteryLevel, timeOut, networkTraffic, mobileTraffic,interactionTime,0.0,0.0);
-        ContextLogger c = new ContextLogger(this);
         //c.clearAllLogs();
         c.logStatus(s);
 
-        stopService(new Intent(this, ScreenOnService.class));
-        startService(new Intent(this,ScreenOnService.class));
+        restartService();
 
         return "Battery level: " + batteryLevel +
                 "\nBrightness: " + brightness +
@@ -116,29 +94,12 @@ public class BatteryService extends Service {
                 "\nInteraction time " + interactionTime;
     }
 
-    private long readFile(String fileName){
-        File file = new File(fileName);
-        BufferedReader br = null;
-        long bytes = 0;
-        try{
-            br = new BufferedReader(new FileReader(file));
-            String line = "";
-            line = br.readLine();
-            bytes = Long.parseLong(line);
-        }  catch (Exception e){
-            e.printStackTrace();
-            return 0;
-
-        } finally{
-            if (br != null)
-                try {
-                    br.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-        }
-
-        return bytes;
+    private void restartService(){
+        stopService(new Intent(this, ScreenOnService.class));
+        startService(new Intent(this,ScreenOnService.class));
     }
+
+
+
 }
 

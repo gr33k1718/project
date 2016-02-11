@@ -35,7 +35,7 @@
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>
         </receiver>
-        <service android:name=".BatteryService"></service>
+        <service android:name=".LogService"></service>
         <service android:name=".ScreenOnService"></service>
     </application>
     <uses-permission android:name="android.permission.BATTERY_STATS"></uses-permission>

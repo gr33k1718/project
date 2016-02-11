@@ -6,12 +6,31 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.TrafficStats;
 import android.widget.Toast;
 
 public class NetworkContext {
 
     private static Context context = GlobalVars.getAppContext();
+    private static final String RX_FILE = "/sys/class/net/wlan0/statistics/rx_bytes";
+    private static final String TX_FILE = "/sys/class/net/wlan0/statistics/tx_bytes";
 
+
+    public static long getNetworkTraffic(){
+        long prevNetworkStats = NetworkContext.loadTraffic(Constants.NETWORK_TRAFFIC);
+        long currentNetworkStats = FileReaders.readNetworkTraffic(TX_FILE) + FileReaders.readNetworkTraffic(RX_FILE);
+        NetworkContext.saveTraffic(currentNetworkStats,Constants.NETWORK_TRAFFIC);
+
+        return currentNetworkStats - prevNetworkStats;
+    }
+
+    public static long getMobileTraffic(){
+        long prevMobileStats = NetworkContext.loadTraffic(Constants.MOBILE_TRAFFIC);
+        long currentMobileStats = TrafficStats.getMobileRxBytes() + TrafficStats.getMobileTxBytes();
+        NetworkContext.saveTraffic(currentMobileStats,Constants.MOBILE_TRAFFIC);
+
+        return currentMobileStats - prevMobileStats;
+    }
 
     public static void saveTraffic(Long traffic, int type){
         SharedPreferences settings;
